@@ -19,6 +19,8 @@ object SessionResult {
     player2.balance = player2.balance - token
     player1.playerResult = LoseTokens
     player2.playerResult = LoseTokens
+    resetWinOrLosePlayerToDefault(player1)
+    resetWinOrLosePlayerToDefault(player2)
     TwoLosses
   }
 
@@ -35,6 +37,8 @@ object SessionResult {
     losePlayer.balance = losePlayer.balance - token
     winPlayer.playerResult = GainTokens
     losePlayer.playerResult = LoseTokens
+    resetWinOrLosePlayerToDefault(winPlayer)
+    resetWinOrLosePlayerToDefault(losePlayer)
     OneWinOneLoss
   }
 
@@ -51,5 +55,19 @@ object SessionResult {
     player1.playerResult = Draw
     player2.playerResult = Draw
     SessionDraw
+  }
+
+  /**
+   * Reset win on lose player tp default settings
+   *
+   * @param player win or lose player
+   */
+  def resetWinOrLosePlayerToDefault(player: PlayerDetails): Unit = {
+    player.inSession = false
+    player.pairedPlayer = ""
+    player.playersPick = NoPick
+    player.gameType = NoGameType
+    player.dealtCards = Seq.empty[Card]
+    player.playerResult = NoResult
   }
 }

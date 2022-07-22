@@ -18,32 +18,11 @@ object GameSession {
    * @param gameType Game Type
    */
   def sessionSetup(player1: PlayerDetails, player2: PlayerDetails, gameType: GameType): Unit = {
-    player1.pairedPlayer = player2.playerId
-    player2.pairedPlayer = player1.playerId
+    player1.pairedPlayer = player2.playerUuid
+    player2.pairedPlayer = player1.playerUuid
     player1.inSession = true
     player2.inSession = true
   }
-
-  /**
-   * Retrieve players picks
-   *
-   * @param n       number of times to retry
-   * @param player1 Player 1
-   * @param player2 Player 2
-   * @return Boolean
-   */
-  @tailrec
-  def playerPicks(n: Int)(player1: PlayerDetails, player2: PlayerDetails): Boolean =
-    Try {
-      player1.playersPick != NoPick && player2.playersPick != NoPick
-    } match {
-      case Success(_) =>
-        true
-      case _ if n > 1 =>
-        Thread.sleep(1000)
-        playerPicks(n - 1)(player1, player2)
-      case Failure(_) => throw new Exception("player/s did not play or fold")
-    }
 
   /**
    * Deal player cards and play
@@ -57,9 +36,6 @@ object GameSession {
     val dealSingleCardGameCards = dealCards(gameType = gameType)
     player1.dealtCards = player1.dealtCards.appendedAll(dealSingleCardGameCards._1)
     player2.dealtCards = player2.dealtCards.appendedAll(dealSingleCardGameCards._2)
-
-    // This serves for th purpose when the players pick is added after the cards are dealt.
-    playerPicks(5)(player1 = player1, player2 = player2)
 
     scorePlayers(gameType = gameType, player1 = player1, player2 = player2)
   }
@@ -76,7 +52,7 @@ object GameSession {
     println(
       s"""
          |Starting a $gameType game session between:\n
-         |${player1.playerId} with balance - ${player1.balance} and ${player2.playerId} with balance ${player2.balance}
+         |${player1.playerName} with balance - ${player1.balance} and ${player2.playerName} with balance ${player2.balance}
          |\n
          |""".stripMargin
     )
@@ -87,13 +63,12 @@ object GameSession {
     println(
       s"""
          |The Game Session Outcome is $gameOutcome\n
-         |${player1.playerId}'s balance is ${player1.balance} and ${player2.playerId}'s balance is ${player2.balance}
+         |${player1.playerName}'s balance is ${player1.balance} and ${player2.playerName}'s balance is ${player2.balance}
          |\n
          |""".stripMargin
     )
     gameOutcome match {
       case SessionDraw =>
-        playerPicks(5)(player1 = player1, player2 = player2)
         dealAndPlay(player1: PlayerDetails, player2: PlayerDetails, gameType: GameType)
       case _ => gameOutcome
     }
